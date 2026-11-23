@@ -1,7 +1,11 @@
 {
-  "name": "PlaneFight",
-  "uuid": "859d6609-3a40-4b59-8e05-ff1e12bb4f94",
-  "creator": {
-    "version": "3.8.8"
-  }
+	"name": "PlaneFight",
+	"uuid": "859d6609-3a40-4b59-8e05-ff1e12bb4f94",
+	"creator": {
+		"version": "3.8.8"
+	},
+	"pink": {
+		"uuid": "d8fe790c-b59e-4744-a2e4-6bcc182308f4",
+		"version": "1.127.0"
+	}
 }

@@ -2,12 +2,12 @@
   "ver": "2.0.4",
   "importer": "animation-clip",
   "imported": true,
-  "uuid": "008d5034-5233-4650-82eb-4f415d66de29",
+  "uuid": "b604feda-de9f-4f8f-81ca-d228069bcce0",
   "files": [
     ".bin"
   ],
   "subMetas": {},
   "userData": {
-    "name": "Enemy2_hit"
+    "name": "Player_Down"
   }
 }

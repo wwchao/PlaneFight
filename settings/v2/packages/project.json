@@ -5,5 +5,22 @@
       "width": 480,
       "height": 852
     }
+  },
+  "physics": {
+    "collisionGroups": [
+      {
+        "index": 1,
+        "name": "Enemy"
+      },
+      {
+        "index": 2,
+        "name": "Bullet"
+      }
+    ],
+    "collisionMatrix": {
+      "0": 1,
+      "1": 4,
+      "2": 2
+    }
   }
 }
