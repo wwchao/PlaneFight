@@ -20,7 +20,7 @@ export class Enemy extends Component {
     onBeginContact(selfCollider: Collider2D, otherCollider: Collider2D, contact: any) {
         this.hp -= 1;
 
-        otherCollider.node.destroy();
+        // otherCollider.node.destroy();
 
         if (this.hp <= 0) {
             this.anim?.play('Enemy_Down');
