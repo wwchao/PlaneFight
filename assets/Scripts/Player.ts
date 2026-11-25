@@ -1,4 +1,4 @@
-import { _decorator, Component, EventTouch, Input, input, instantiate, Node, Prefab, Animation, Collider2D, Contact2DType, UIOpacity } from 'cc';
+import { _decorator, Component, EventTouch, Input, input, instantiate, Node, Prefab, Animation, Collider2D, Contact2DType, UIOpacity, Label } from 'cc';
 const { ccclass, property } = _decorator;
 
 enum ShootType {
@@ -35,6 +35,8 @@ export class Player extends Component {
     collider: Collider2D = null;
     private isInvincible: boolean = false;               // 当前是否处于无敌状态（true 时忽略一切碰撞伤害）
     private playerBodyOpacity: UIOpacity = null;         // 机体透明度组件，用于实现无敌闪烁效果
+    @property(Label)
+    lifeLabel: Label = null;                             // 生命值文本：编辑器里把 Canvas/LifeLabel 拖到此槽位
 
     protected onLoad(): void {
         this.playerBodyAnimation = this.playerBody.getComponent(Animation);
@@ -49,6 +51,16 @@ export class Player extends Component {
 
         this.collider = this.getComponent(Collider2D);
         this.collider?.on(Contact2DType.BEGIN_CONTACT, this.onBeginContact, this);
+
+        // 初始化生命值显示（文本节点由编辑器创建，这里只负责刷新内容）
+        // 优先使用编辑器里拖拽绑定的引用；未绑定时按路径兜底查找 Canvas/LifeLabel
+        if (!this.lifeLabel) {
+            this.lifeLabel = this.node.parent?.getChildByName('LifeLabel')?.getComponent(Label) ?? null;
+        }
+        if (!this.lifeLabel) {
+            console.warn('[Player] 未找到 LifeLabel，生命值文本不会显示');
+        }
+        this.refreshLifeLabel();
     }
 
     protected onDestroy(): void {
@@ -59,6 +71,8 @@ export class Player extends Component {
         if (this.collider) {
             this.collider.off(Contact2DType.BEGIN_CONTACT, this.onBeginContact, this);
         }
+        // 玩家销毁时一并销毁生命值文本，避免留在界面上显示旧数据
+        this.lifeLabel?.node.destroy();
     }
 
     onBeginContact(selfCollider: Collider2D, otherCollider: Collider2D, contact: any) {
@@ -68,6 +82,8 @@ export class Player extends Component {
         }
 
         this.liftCount -= 1;
+        // 扣血后立即刷新界面上的生命值显示
+        this.refreshLifeLabel();
 
         if (this.liftCount <= 0) {
             console.log('Player is dead');
@@ -79,6 +95,17 @@ export class Player extends Component {
             if (this.collider) {
                 this.collider.off(Contact2DType.BEGIN_CONTACT, this.onBeginContact, this);
             }
+
+            // 延迟 0.8 秒显示失败弹窗：先让 Player_Down 动画播完，再盖住屏幕
+            // 弹窗节点由编辑器搭建（Canvas/GameOverPanel），这里只切换它的显隐
+            this.scheduleOnce(() => {
+                const panel = this.node.parent?.getChildByName('GameOverPanel');
+                if (panel) {
+                    panel.active = true;
+                } else {
+                    console.warn('[Player] 未找到 Canvas/GameOverPanel 节点');
+                }
+            }, 0.8);
 
             this.scheduleOnce(() => {
                 this.node.destroy();
@@ -137,6 +164,17 @@ export class Player extends Component {
         if (this.playerBodyOpacity) {
             this.playerBodyOpacity.opacity = 255;
         }
+    }
+
+    /**
+     * 刷新生命值文本：受击扣血后调用，显示当前剩余生命
+     */
+    private refreshLifeLabel(): void {
+        if (!this.lifeLabel) {
+            return;
+        }
+        // 生命值可能扣到 0 以下，界面统一显示不小于 0 的数字
+        this.lifeLabel.string = `生命: ${Math.max(this.liftCount, 0)}`;
     }
 
     onTouchMove (event: EventTouch) {
